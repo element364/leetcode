@@ -33,17 +33,66 @@ func (head *ListNode) Print() {
 	fmt.Println("]")
 }
 
+func Count(this *ListNode) int {
+	count := 0
+	for curr := this; curr != nil; curr = curr.Next {
+		count++
+	}
+	return count
+}
+
+func Split(this *ListNode, m int) (*ListNode, *ListNode) {
+	curr := this
+	for i := 1; i < m; i++ {
+		curr = curr.Next
+	}
+
+	r := curr.Next
+	curr.Next = nil
+	return this, r
+}
+
 func sortList(head *ListNode) *ListNode {
-	for curr := head; curr != nil && curr.Next != nil; curr = curr.Next {
-		for ptr := curr.Next; ptr != nil; ptr = ptr.Next {
-			if ptr.Val < curr.Val {
-				t := curr.Val
-				curr.Val = ptr.Val
-				ptr.Val = t
+	count := Count(head)
+	if count < 2 {
+		return head
+	}
+
+	mid := count / 2
+	l, r := Split(head, mid)
+	l = sortList(l)
+	r = sortList(r)
+
+	// Merge
+	var res *ListNode
+	var cur *ListNode
+	for lp, rp := l, r; lp != nil || rp != nil; {
+		n := &ListNode{}
+		if lp != nil && rp != nil {
+			if lp.Val < rp.Val {
+				n.Val = lp.Val
+				lp = lp.Next
+			} else {
+				n.Val = rp.Val
+				rp = rp.Next
 			}
+		} else if lp != nil {
+			n.Val = lp.Val
+			lp = lp.Next
+		} else if rp != nil {
+			n.Val = rp.Val
+			rp = rp.Next
+		}
+
+		if res == nil {
+			res = n
+			cur = res
+		} else {
+			cur.Next = n
+			cur = n
 		}
 	}
-	return head
+	return res
 }
 
 func main() {
